@@ -12,11 +12,11 @@
 namespace Manticoresearch\Buddy\Plugin\Insert;
 
 use Manticoresearch\Buddy\Core\ManticoreSearch\Endpoint as ManticoreEndpoint;
-use Manticoresearch\Buddy\Core\Network\Request as NetworkRequest;
-use Manticoresearch\Buddy\Core\Plugin\Request as BaseRequest;
+use Manticoresearch\Buddy\Core\Network\Request;
+use Manticoresearch\Buddy\Core\Plugin\BasePayload;
 use Manticoresearch\Buddy\Plugin\Insert\QueryParser\Loader;
 
-final class Request extends BaseRequest {
+final class Payload extends BasePayload {
 	/** @var array<string> */
 	public array $queries = [];
 
@@ -33,10 +33,10 @@ final class Request extends BaseRequest {
 	}
 
 	/**
-	 * @param NetworkRequest $request
+	 * @param Request $request
 	 * @return static
 	 */
-	public static function fromNetworkRequest(NetworkRequest $request): static {
+	public static function fromRequest(Request $request): static {
 		$self = new static();
 		$parser = Loader::getInsertQueryParser($request->path, $request->endpointBundle);
 		$self->path = $request->path;
@@ -73,10 +73,10 @@ final class Request extends BaseRequest {
 	}
 
 	/**
-	 * @param NetworkRequest $request
+	 * @param Request $request
 	 * @return bool
 	 */
-	public static function hasMatch(NetworkRequest $request): bool {
+	public static function hasMatch(Request $request): bool {
 		$queryLowercase = strtolower($request->payload);
 
 		// Making a bit of extra preprocessing to simplify following detection of the bulk insert query

@@ -14,7 +14,7 @@
 use Exception;
 use Manticoresearch\Buddy\Core\Error\GenericError;
 use Manticoresearch\Buddy\Core\ManticoreSearch\Client as HTTPClient;
-use Manticoresearch\Buddy\Core\Plugin\ClientQueryExecutor;
+use Manticoresearch\Buddy\Core\Plugin\BaseHandlerWithClient;
 use Manticoresearch\Buddy\Core\Task\Task;
 use Manticoresearch\Buddy\Core\Task\TaskResult;
 use Manticoresearch\Buddy\Plugin\Insert\Error\AutoSchemaDisabledError;
@@ -24,14 +24,14 @@ use parallel\Runtime;
 /**
  * This is the parent class to handle erroneous Manticore queries
  */
-class Executor extends ClientQueryExecutor {
+class Handler extends BaseHandlerWithClient {
 	/**
 	 *  Initialize the executor
 	 *
-	 * @param Request $request
+	 * @param Payload $payload
 	 * @return void
 	 */
-	public function __construct(public Request $request) {
+	public function __construct(public Payload $payload) {
 	}
 
 	/**
@@ -43,7 +43,7 @@ class Executor extends ClientQueryExecutor {
 	 */
 	public function run(Runtime $runtime): Task {
 		// Check that we run it in rt mode because it will not work in plain
-		$settings = $this->request->getManticoreSettings();
+		$settings = $this->payload->getSettings();
 		if (!$settings->isRtMode()) {
 			throw GenericError::create(
 				'Cannot create the table automatically in Plain mode.'
@@ -60,15 +60,15 @@ class Executor extends ClientQueryExecutor {
 
 		// We run in a thread anyway but in case if we need blocking
 		// We just waiting for a thread to be done
-		$taskFn = function (Request $request, HTTPClient $manticoreClient): TaskResult {
-			for ($i = 0, $maxI = sizeof($request->queries) - 1; $i <= $maxI; $i++) {
-				$query = $request->queries[$i];
+		$taskFn = function (Payload $handler, HTTPClient $manticoreClient): TaskResult {
+			for ($i = 0, $maxI = sizeof($handler->queries) - 1; $i <= $maxI; $i++) {
+				$query = $handler->queries[$i];
 				// When processing the final query we need to make sure the response to client
 				// has the same format as the initial request, otherwise we just use 'sql' default endpoint
 				if ($i === $maxI) {
-					$manticoreClient->setPath($request->path);
-					if ($request->contentType) {
-						$manticoreClient->setContentTypeHeader($request->contentType);
+					$manticoreClient->setPath($handler->path);
+					if ($handler->contentType) {
+						$manticoreClient->setContentTypeHeader($handler->contentType);
 					}
 				}
 
@@ -82,7 +82,7 @@ class Executor extends ClientQueryExecutor {
 			return new TaskResult((array)json_decode($resp->getBody(), true));
 		};
 		return Task::createInRuntime(
-			$runtime, $taskFn, [$this->request, $this->manticoreClient]
+			$runtime, $taskFn, [$this->payload, $this->manticoreClient]
 		)->run();
 	}
 }
