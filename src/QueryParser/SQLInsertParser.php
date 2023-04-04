@@ -90,9 +90,9 @@ class SQLInsertParser extends BaseParser implements InsertQueryParserInterface {
 				if (!$parenthInd && $valExpr[$i - 1] !== '\\') {
 					$isValStarted = false;
 					return true;
-				} else {
-					$curVal .= ')' ;
 				}
+
+				$curVal .= ')' ;
 				break;
 			default:
 				if ($isValStarted) {
