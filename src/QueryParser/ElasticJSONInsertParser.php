@@ -40,6 +40,8 @@ class ElasticJSONInsertParser extends JSONInsertParser {
 	 * @return array{0:string,1:?int, 2:bool}
 	 */
 	protected function parseQueryPath(string $path): array {
+		// The path in Elasticsearch-like requests can also contain some query parameters that need to be removed
+		[$path] = explode('?', $path);
 		$pathParts = explode('/', $path);
 		[$isBulkRequest, $tableName] = match ($pathParts[0]) {
 			'_bulk' => [true, ''],
