@@ -67,12 +67,14 @@ class ElasticJSONInsertParser extends JSONInsertParser {
 		}
 		// When using the elastic-like format for bulk requests, table name is passed as the part of 'index' row info
 		$this->isIndexInfoRow = $this->isBulkQuery ? !$this->isIndexInfoRow : false;
-		if ($this->isIndexInfoRow && isset($query['index']['_index'])
-			&& is_string($query['index']['_index'])) {
-			$this->name = $query['index']['_index'];
-		}
-		// When using the elastic-like format, the 'id' field is optional so we omit it
-		if (!$this->isIndexInfoRow && isset($query['id'])) {
+		if ($this->isIndexInfoRow) {
+			if (isset($query['index']['_index']) && is_string($query['index']['_index'])) {
+				$this->name = $query['index']['_index'];
+			} elseif (isset($query['create']['_index']) && is_string($query['create']['_index'])) {
+				$this->name = $query['create']['_index'];
+			}
+		} elseif (isset($query['id'])) {
+			// When using the elastic-like format, the 'id' field is optional so we omit it
 			unset($query['id']);
 		}
 

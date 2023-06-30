@@ -93,6 +93,7 @@ final class Payload extends BasePayload {
 		$isInsertHTTPQuery = match ($request->endpointBundle) {
 			ManticoreEndpoint::Insert => true,
 			ManticoreEndpoint::Bulk => str_starts_with($queryLowercase, '"insert"')
+			|| str_starts_with($queryLowercase, '"create"')
 			|| str_starts_with($queryLowercase, '"index"'),
 			default => false,
 		};
