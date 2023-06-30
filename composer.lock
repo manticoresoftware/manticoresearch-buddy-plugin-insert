@@ -711,17 +711,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/manticoresoftware/buddy-core.git",
-                "reference": "c5c662f7d97ed2d27bc24fb16abac3dd8c2b7449"
+                "reference": "264430a415eca5fe549910fcff36f98e98f557ed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/manticoresoftware/buddy-core/zipball/c5c662f7d97ed2d27bc24fb16abac3dd8c2b7449",
-                "reference": "c5c662f7d97ed2d27bc24fb16abac3dd8c2b7449",
+                "url": "https://api.github.com/repos/manticoresoftware/buddy-core/zipball/264430a415eca5fe549910fcff36f98e98f557ed",
+                "reference": "264430a415eca5fe549910fcff36f98e98f557ed",
                 "shasum": ""
             },
             "require": {
                 "composer/composer": "^2.5",
-                "symfony/console": "^6.2"
+                "symfony/console": "^6.2",
+                "symfony/dependency-injection": "^6.1"
             },
             "require-dev": {
                 "code-lts/doctum": "5.x-dev",
@@ -752,7 +753,7 @@
                 "issues": "https://github.com/manticoresoftware/buddy-core/issues",
                 "source": "https://github.com/manticoresoftware/buddy-core/tree/main"
             },
-            "time": "2023-04-04T09:35:19+00:00"
+            "time": "2023-06-22T07:06:56+00:00"
         },
         {
             "name": "psr/container",
