@@ -73,7 +73,7 @@ class ElasticJSONInsertParser extends JSONInsertParser {
 			} elseif (isset($query['create']['_index']) && is_string($query['create']['_index'])) {
 				$this->name = $query['create']['_index'];
 			}
-		} elseif (isset($query['id']))  {
+		} elseif (isset($query['id'])) {
 			// When using the elastic-like format, the 'id' field is optional so we omit it
 			unset($query['id']);
 		}
