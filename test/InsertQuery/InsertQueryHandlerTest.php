@@ -17,10 +17,10 @@ use Manticoresearch\Buddy\Core\ManticoreSearch\Settings as ManticoreSettings;
 use Manticoresearch\Buddy\Core\Network\Request;
 use Manticoresearch\Buddy\Core\Network\Response;
 use Manticoresearch\Buddy\Core\Task\Task;
-use Manticoresearch\Buddy\Plugin\Insert\Handler;
-use Manticoresearch\Buddy\Plugin\Insert\Payload;
 use Manticoresearch\Buddy\CoreTest\Trait\TestHTTPServerTrait;
 use Manticoresearch\Buddy\CoreTest\Trait\TestInEnvironmentTrait;
+use Manticoresearch\Buddy\Plugin\Insert\Handler;
+use Manticoresearch\Buddy\Plugin\Insert\Payload;
 use PHPUnit\Framework\TestCase;
 
 class InsertQueryHandlerTest extends TestCase {

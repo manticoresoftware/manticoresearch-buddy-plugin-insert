@@ -10,9 +10,9 @@
  */
 
 use Manticoresearch\Buddy\Core\Error\QueryParseError;
+use Manticoresearch\Buddy\CoreTest\Trait\TestProtectedTrait;
 use Manticoresearch\Buddy\Plugin\Insert\QueryParser\Datatype;
 use Manticoresearch\Buddy\Plugin\Insert\QueryParser\JSONInsertParser;
-use Manticoresearch\Buddy\CoreTest\Trait\TestProtectedTrait;
 use PHPUnit\Framework\TestCase;
 
 class JSONInsertParserTest extends TestCase {
