@@ -13,7 +13,7 @@
 
 use Exception;
 use Manticoresearch\Buddy\Core\Error\GenericError;
-use Manticoresearch\Buddy\Core\ManticoreSearch\Client as HTTPClient;
+use Manticoresearch\Buddy\Core\ManticoreSearch\Client;
 use Manticoresearch\Buddy\Core\Plugin\BaseHandlerWithClient;
 use Manticoresearch\Buddy\Core\Task\Task;
 use Manticoresearch\Buddy\Core\Task\TaskResult;
@@ -60,15 +60,18 @@ class Handler extends BaseHandlerWithClient {
 
 		// We run in a thread anyway but in case if we need blocking
 		// We just waiting for a thread to be done
-		$taskFn = function (Payload $handler, HTTPClient $manticoreClient): TaskResult {
-			for ($i = 0, $maxI = sizeof($handler->queries) - 1; $i <= $maxI; $i++) {
-				$query = $handler->queries[$i];
+		$taskFn = static function (string $args): TaskResult {
+			/** @var Payload $payload */
+			/** @var Client $manticoreClient */
+			[$payload, $manticoreClient] = unserialize($args);
+			for ($i = 0, $maxI = sizeof($payload->queries) - 1; $i <= $maxI; $i++) {
+				$query = $payload->queries[$i];
 				// When processing the final query we need to make sure the response to client
 				// has the same format as the initial request, otherwise we just use 'sql' default endpoint
 				if ($i === $maxI) {
-					$manticoreClient->setPath($handler->path);
-					if ($handler->contentType) {
-						$manticoreClient->setContentTypeHeader($handler->contentType);
+					$manticoreClient->setPath($payload->path);
+					if ($payload->contentType) {
+						$manticoreClient->setContentTypeHeader($payload->contentType);
 					}
 				}
 
@@ -82,7 +85,7 @@ class Handler extends BaseHandlerWithClient {
 			return TaskResult::raw((array)json_decode($resp->getBody(), true));
 		};
 		return Task::createInRuntime(
-			$runtime, $taskFn, [$this->payload, $this->manticoreClient]
+			$runtime, $taskFn, [serialize([$this->payload, $this->manticoreClient])]
 		)->run();
 	}
 }
