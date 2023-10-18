@@ -9,6 +9,7 @@
  program; if you did not, you can find it at http://www.gnu.org/
  */
 
+use Ds\Vector;
 use Manticoresearch\Buddy\Core\ManticoreSearch\Client as HTTPClient;
 use Manticoresearch\Buddy\Core\ManticoreSearch\Endpoint as ManticoreEndpoint;
 use Manticoresearch\Buddy\Core\ManticoreSearch\RequestFormat;
@@ -16,7 +17,6 @@ use Manticoresearch\Buddy\Core\ManticoreSearch\Response as ManticoreResponse;
 use Manticoresearch\Buddy\Core\ManticoreSearch\Settings as ManticoreSettings;
 use Manticoresearch\Buddy\Core\Network\Request;
 use Manticoresearch\Buddy\Core\Network\Response;
-use Manticoresearch\Buddy\Core\Task\Task;
 use Manticoresearch\Buddy\CoreTest\Trait\TestHTTPServerTrait;
 use Manticoresearch\Buddy\CoreTest\Trait\TestInEnvironmentTrait;
 use Manticoresearch\Buddy\Plugin\Insert\Handler;
@@ -39,23 +39,25 @@ class InsertQueryHandlerTest extends TestCase {
 	 */
 	protected function runTask(Request $networkRequest, string $serverUrl, string $resp): void {
 		$payload = Payload::fromRequest($networkRequest);
+		/** @var Vector<array{key:string,value:mixed}> */
+		$vector = new Vector(
+			[
+			['key' => 'configuration_file', 'value' => '/etc/manticoresearch/manticore.conf'],
+			['key' => 'worker_pid', 'value' => 7718],
+			['key' => 'searchd.auto_schema', 'value' => '1'],
+			['key' => 'searchd.listen', 'value' => '0.0.0:9308:http'],
+			['key' => 'searchd.log', 'value' => '/var/log/manticore/searchd.log'],
+			['key' => 'searchd.query_log', 'value' => '/var/log/manticore/query.log'],
+			['key' => 'searchd.pid_file', 'value' => '/var/run/manticore/searchd.pid'],
+			['key' => 'searchd.data_dir', 'value' => '/var/lib/manticore'],
+			['key' => 'searchd.query_log_format', 'value' => 'sphinxql'],
+			['searchd.buddy_path', 'value' => 'manticore-executor /workdir/src/ main.php --debug'],
+			['key' => 'common.plugin_dir', 'value' => '/usr/local/lib/manticore'],
+			['key' => 'common.lemmatizer_base', 'value' => '/usr/share/manticore/morph/'],
+			]
+		);
 		$payload->setSettings(
-			ManticoreSettings::fromArray(
-				[
-					'configuration_file' => '/etc/manticoresearch/manticore.conf',
-					'worker_pid' => 7718,
-					'searchd.auto_schema' => '1',
-					'searchd.listen' => '0.0.0:9308:http',
-					'searchd.log' => '/var/log/manticore/searchd.log',
-					'searchd.query_log' => '/var/log/manticore/query.log',
-					'searchd.pid_file' => '/var/run/manticore/searchd.pid',
-					'searchd.data_dir' => '/var/lib/manticore',
-					'searchd.query_log_format' => 'sphinxql',
-					'searchd.buddy_path' => 'manticore-executor /workdir/src/main.php --debug',
-					'common.plugin_dir' => '/usr/local/lib/manticore',
-					'common.lemmatizer_base' => '/usr/share/manticore/morph/',
-				]
-			)
+			ManticoreSettings::fromVector($vector)
 		);
 
 		self::setBuddyVersion();
@@ -63,9 +65,7 @@ class InsertQueryHandlerTest extends TestCase {
 		$handler = new Handler($payload);
 		$handler->setManticoreClient($manticoreClient);
 		ob_flush();
-		self::setTaskRuntime();
-		$runtime = Task::createRuntime();
-		$task = $handler->run($runtime);
+		$task = $handler->run();
 		$task->wait();
 
 		$this->assertEquals(true, $task->isSucceed());

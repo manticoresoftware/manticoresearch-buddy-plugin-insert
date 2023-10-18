@@ -19,7 +19,6 @@ use Manticoresearch\Buddy\Core\Task\Task;
 use Manticoresearch\Buddy\Core\Task\TaskResult;
 use Manticoresearch\Buddy\Plugin\Insert\Error\AutoSchemaDisabledError;
 use RuntimeException;
-use parallel\Runtime;
 
 /**
  * This is the parent class to handle erroneous Manticore queries
@@ -37,11 +36,10 @@ class Handler extends BaseHandlerWithClient {
 	/**
 	 * Process the request and return self for chaining
 	 *
-	 * @param Runtime $runtime
 	 * @return Task
 	 * @throws RuntimeException
 	 */
-	public function run(Runtime $runtime): Task {
+	public function run(): Task {
 		// Check that we run it in rt mode because it will not work in plain
 		$settings = $this->payload->getSettings();
 		if (!$settings->isRtMode()) {
@@ -60,10 +58,7 @@ class Handler extends BaseHandlerWithClient {
 
 		// We run in a thread anyway but in case if we need blocking
 		// We just waiting for a thread to be done
-		$taskFn = static function (string $args): TaskResult {
-			/** @var Payload $payload */
-			/** @var Client $manticoreClient */
-			[$payload, $manticoreClient] = unserialize($args);
+		$taskFn = static function (Payload $payload, Client $manticoreClient): TaskResult {
 			for ($i = 0, $maxI = sizeof($payload->queries) - 1; $i <= $maxI; $i++) {
 				$query = $payload->queries[$i];
 				// When processing the final query we need to make sure the response to client
@@ -84,8 +79,8 @@ class Handler extends BaseHandlerWithClient {
 
 			return TaskResult::raw((array)json_decode($resp->getBody(), true));
 		};
-		return Task::createInRuntime(
-			$runtime, $taskFn, [serialize([$this->payload, $this->manticoreClient])]
+		return Task::create(
+			$taskFn, [$this->payload, $this->manticoreClient]
 		)->run();
 	}
 }
