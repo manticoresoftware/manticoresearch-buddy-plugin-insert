@@ -61,16 +61,7 @@ class Handler extends BaseHandlerWithClient {
 		$taskFn = static function (Payload $payload, Client $manticoreClient): TaskResult {
 			for ($i = 0, $maxI = sizeof($payload->queries) - 1; $i <= $maxI; $i++) {
 				$query = $payload->queries[$i];
-				// When processing the final query we need to make sure the response to client
-				// has the same format as the initial request, otherwise we just use 'sql' default endpoint
-				if ($i === $maxI) {
-					$manticoreClient->setPath($payload->path);
-					if ($payload->contentType) {
-						$manticoreClient->setContentTypeHeader($payload->contentType);
-					}
-				}
-
-				$resp = $manticoreClient->sendRequest($query);
+				$resp = $manticoreClient->sendRequest($query, $i === 0 ? null : $payload->path);
 			}
 
 			if (!isset($resp)) {

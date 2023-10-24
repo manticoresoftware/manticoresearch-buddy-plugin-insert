@@ -23,9 +23,6 @@ final class Payload extends BasePayload {
 	/** @var string $path */
 	public string $path;
 
-	/** @var string $contentType */
-	public string $contentType = '';
-
 	/**
 	 * @return void
 	 */
@@ -41,10 +38,8 @@ final class Payload extends BasePayload {
 		$parser = Loader::getInsertQueryParser($request->path, $request->endpointBundle);
 		$self->path = $request->path;
 		if ($request->endpointBundle === ManticoreEndpoint::Bulk) {
-			$self->contentType = 'application/x-ndjson';
-			if ((!str_ends_with($request->payload, "\n"))) {
-				$request->payload .= "\n";
-			}
+			$self->path = '_bulk';
+			$request->payload = trim($request->payload) . "\n";
 		}
 		$self->queries[] = $self->buildCreateTableQuery(...$parser->parse($request->payload));
 		$self->queries[] = $request->payload;
