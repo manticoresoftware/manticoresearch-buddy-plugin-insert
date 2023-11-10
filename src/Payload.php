@@ -93,6 +93,7 @@ final class Payload extends BasePayload {
 			default => false,
 		};
 		$isInsertError = str_contains($request->error, 'no such index')
+			|| str_contains($request->error, 'unsupported endpoint')
 			|| (str_contains($request->error, 'table ') && str_contains($request->error, ' absent'));
 
 		return ($isInsertError && ($isInsertSQLQuery || $isInsertHTTPQuery));
